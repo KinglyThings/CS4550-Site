@@ -1,0 +1,155 @@
+/* reservation.css */
+
+html, body {
+	margin: 10px;
+	padding: 0px;
+}
+
+.header {
+	font-size: 40pt;
+	font-family: Verdana, Georgia, serif;
+	font-weight: 900;
+	display: inline;
+}
+
+.subheader {
+	font-family:serif;
+	font-size:14pt;
+	display: inline;
+}
+
+#navbar {
+	/* Borders */
+	border-radius: 20px;
+	-moz-border-radius: 20px;
+	-webkit-border-radius: 20px;
+	border: 3px solid black;
+
+	/* Background */
+	background-color: #66CD00;
+
+	/* Position and Sizing */
+	min-width: 600px;
+	width: 75%;
+	padding-left: 50px;
+	padding-right: 50px;
+	margin-left: auto;
+	margin-right: auto;
+	margin-bottom: 40px;
+	position: relative;
+	display: inline-block;
+
+	/* Fonts */
+	text-align: center;
+}
+
+/* TODO: Make the first and last element have rounded borders so it doesn't look werid */
+
+.nav-button {
+	/* Borders */
+	border: 3px solid black;
+	border-radius: 10px;
+	-webkit-border-radius: 10px;
+	-mox-border-radius: 10px;
+
+	/* Position and Sizing */
+	/* TODO: Make this display properly on small monitors 
+		Make multiple rows of nav buttons?
+		Make it scroll? (No, bad idea, all content should be visible)
+	*/
+	/* TODO: Draw attention to the Reservations button with CSS/JS */
+	min-width: 150px;
+	width: auto;
+	max-width: 250px;
+	display: inline-block;
+	padding: 10px;
+	margin: 10px;
+	overflow: hidden;
+
+	/* Fonts */
+	/* TODO: Move this to common font location */
+	font-family: Verdana, Georgia, sans-serif;
+	color: #FFF;
+	font-size: 20pt;
+	font-weight: 900;
+	text-align: center;
+
+	/* Background */
+	background-color: #458B00;
+
+	/* CSS3 Transitions */
+	transition: border-color 0.2s;
+	-webkit-transition: border-color 0.2s;
+	transition: background-color 0.2s;
+	-webkit-transition: background-color 0.2s;
+}
+
+.nav-button:hover {
+	border-color: yellow;
+}
+
+.nav-button:active {
+	background-color: #5F9F9F;
+}
+
+#contact-info {
+	/* Fonts */
+	color: #FFF;
+	font-size: 14pt;
+	font-weight: 900;
+	font-family: Verdana, Georgia, sans-serif;
+	text-align: center;
+	vertical-align: top;
+
+	/* Background */
+	background-color: #66CD00;
+
+	/* Position and Sizing */
+	min-width: 350px;
+	width: 350px;
+	position: relative;
+	min-height: 400px;
+	height: 400px;
+	display: inline-block;
+
+	/* Border */
+	border: 5px solid black;
+	border-radius: 20px;
+	-moz-border-radius: 20px;
+	-webkit-border-radius: 20px;
+}
+
+.main-info {
+	/* Border */
+	border: 5px solid black;
+	border-radius: 20px;
+	-moz-border-radius: 20px;
+	-webkit-border-radius: 20px;
+
+	/* Fonts */
+	font-family: Verdana, Georgia, serif;
+	color: black;
+	font-weight: 900;
+	font-size: 14pt;
+	line-height: 1.3em;
+	vertical-align: top;
+
+	/* Position and Sizing */
+	position: relative;
+	width: 700px;
+	min-width: 700px;
+	height: 400px;
+	min-height: 400px;
+	margin-left: 30px;
+	padding: 0px 20px;
+	display: inline-block;
+}
+
+.main-content-container {
+	vertical-align: top;
+}
+
+#logo {
+	height: 150px;
+	width: 150px;
+}
