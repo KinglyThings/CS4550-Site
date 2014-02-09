@@ -84,8 +84,50 @@ html, body {
 	-webkit-transition: background-color 0.2s;
 }
 
+#calculate_button {
+
+	/* Borders */
+	border: 3px solid black;
+	border-radius: 10px;
+	-webkit-border-radius: 10px;
+	-mox-border-radius: 10px;
+
+	cursor: pointer;
+
+	/* Position and Sizing */
+	height: 2em;
+	padding-top: 1em;
+
+	/* Fonts */
+	/* TODO: Move this to common font location */
+	font-family: Verdana, Georgia, sans-serif;
+	color: #FFF;
+	font-size: 30pt;
+	font-weight: 900;
+	text-align: center;
+
+	/* Background */
+	background-color: #458B00;
+
+	/* CSS3 Transitions */
+	transition: border-color 0.2s;
+	-webkit-transition: border-color 0.2s;
+	transition: background-color 0.2s;
+	-webkit-transition: background-color 0.2s;
+}
+
+#calculate_button:hover {
+	border-color: yellow;
+	cursor: pointer;
+}
+
+#calculate_button:active {
+	background-color: #5F9F9F;
+}
+
 .nav-button:hover {
 	border-color: yellow;
+	cursor: pointer;
 }
 
 .nav-button:active {
@@ -152,4 +194,104 @@ html, body {
 #logo {
 	height: 150px;
 	width: 150px;
+}
+
+#calculator {
+	/* Border */
+	border: 5px solid black;
+	border-radius: 20px;
+	-moz-border-radius: 20px;
+	-webkit-border-radius: 20px;
+
+	/* Fonts */
+	font-family: Verdana, Georgia, serif;
+	color: black;
+	font-weight: 900;
+	font-size: 14pt;
+	line-height: 1.3em;
+	vertical-align: top;
+	text-align: center;
+
+	/* Position and Sizing */
+	position: relative;
+	width: 700px;
+	min-width: 700px;
+	height: 400px;
+	min-height: 400px;
+	margin-left: 30px;
+	padding: 0px 20px;
+	display: inline-block;
+}
+
+#results {
+	/* Border */
+	border: 5px solid black;
+	border-radius: 20px;
+	-moz-border-radius: 20px;
+	-webkit-border-radius: 20px;
+
+	/* Fonts */
+	font-family: Verdana, Georgia, serif;
+	color: black;
+	font-weight: 900;
+	font-size: 32pt;
+	line-height: 1.3em;
+	vertical-align: top;
+	text-align: center;
+
+	/* Position and Sizing */
+	position: relative;
+	width: 700px;
+	min-width: 700px;
+	height: 350px;
+	min-height: 350px;
+	margin-left: 30px;
+	padding: 0px 20px;
+	padding-top: 50px;
+	display: inline-block;
+}
+
+/* TODO: I have three similar buttons with similar styles. ABSTRACT */
+#step_one_button {
+
+	/* Borders */
+	border: 3px solid black;
+	border-radius: 10px;
+	-webkit-border-radius: 10px;
+	-mox-border-radius: 10px;
+
+	cursor: pointer;
+
+	/* Position and Sizing */
+	height: 1em;
+	padding-top: 0.25em;
+	padding-bottom: 0.25em;
+	margin-top: 15px;
+
+	/* Fonts */
+	/* TODO: Move this to common font location */
+	font-family: Verdana, Georgia, sans-serif;
+	color: #FFF;
+	font-size: 20pt;
+	font-weight: 900;
+	text-align: center;
+	vertical-align: text-bottom;
+
+	/* Background */
+	background-color: #458B00;
+
+	/* CSS3 Transitions */
+	transition: border-color 0.2s;
+	-webkit-transition: border-color 0.2s;
+	transition: background-color 0.2s;
+	-webkit-transition: background-color 0.2s;
+}
+
+#step_one_button:hover {
+	border-color: yellow;
+	cursor: pointer;
+}
+
+#step_one_button:active {
+	background-color: #5F9F9F;
 }

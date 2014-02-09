@@ -8,6 +8,20 @@
 
 	<!-- CSS and JS files -->
 	<link href="/static/css/reservation.css" media="all" rel="stylesheet" type="text/css">
+
+	<script src="/static/js/jquery-1.10.2.min.js"></script>
+
+	<!-- The onload function: TODO: Move into JS file -->
+	<script>
+		window.onload = function() {
+			$('#calculator').hide();
+		    $('#results').hide();
+		};
+	</script>
+
+
+	<!-- Load the Calculator Js before the page has loaded -->
+	<script src="/static/js/reservationCalculator.js"></script>
 </head>
 <body>
 	<div class="header-container">
@@ -39,7 +53,54 @@
 
 	<div class="main-info">
 		<p> Welcome to our site! This is the home page for Robot Hotel, an affordable, upper-crust experience designed to accomodate non-organic lifeforms. Feel free to browse the site and see our luxurious rooms and conference rooms, make reservations, or just learn more about us and the amenities we can offer. We hope you have a pleasant stay!</p>
+
+		<div id="calculate_button" onclick="openCalculator();">Calculate Reservation Rates</div>
 	</div>
-	
+
+	<!-- This will all be hidden when the page is loaded. -->
+	<div id="calculator">
+		<h2>Reservation Calculator</h2>
+		<div id="calc_step_one">
+			<p>Would you like to reserve a room or a conference hall?</p>
+			<input name="reservation_type" type="radio" value="room" onchange="setReservationType();">Room</input>
+			<input name="reservation_type" type="radio" value="hall" onchange="setReservationType();">Conference Hall</input>
+
+			<div id="room">
+				<p>Select a Room:</p>
+				<select id="room_type" onchange="setRoomType();">
+					<option value="nano">Nano-Room</option>
+					<option value="micro">Micro-Room</option>
+					<option value="drone" selected="selected">Standard Drone Quarters</option>
+					<option value="mega">Mega-Industrial Suite</option>
+				</select>
+			</div>
+			<div id="hall">
+				<p>Select a Conference Hall:</p>
+				<select id="hall_type" onchange="setHallType();">
+					<option value="cyber">Cyber-Meeting Hall</option>
+					<option value="silicon" selected="selected">The Silicon Room</option>
+					<option value="robo">Robo-Basilica</option>
+				</select>
+			</div>
+
+			<div id="time">
+				<p>How long do you want to book for:</p>
+				<select id="time_increment" onchange="setTimeIncrement();">
+					<option value="default" selected="selected">Choose a time interval</option>
+					<option value="1 day">1 Day</option>
+					<option value="3 days">3 Days</option>
+					<option value="1 week">1 Week</option>
+				</select>
+			</div>
+
+			<div id="step_one_button" onclick="calculateAndDisplay();">
+				Calculate My Cost!
+			</div>
+		</div>
+
+	</div>
+
+	<div id="results">
+	</div>
 </body>
 </html>

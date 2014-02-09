@@ -8,6 +8,21 @@
 
 	<!-- CSS and JS files -->
 	<link href="/static/css/reservation.css" media="all" rel="stylesheet" type="text/css">
+
+	<script src="/static/js/jquery-1.10.2.min.js"></script>
+
+	<!-- Load the Calculator Js before the page has loaded -->
+	<script src="/static/js/reservationCalculator.js"></script>
+
+	<!-- The onload function: TODO: Move into JS file -->
+	<script>
+		window.onload = function() {
+			$('#calculator').hide();
+		    $('#results').hide();
+		    openCalculator();
+		};
+	</script>
+
 </head>
 <body>
 	<div class="header-container">
@@ -33,12 +48,47 @@
 	<!-- Rename div id to reflect page contents better, even though it uses same styles? -->
 	<!-- GAH, inline styles. TODO: Move this to the stylesheet when I have more time -->
 	<div id="contact-info" style="background-color:#F22">
-		<h1>Sorry!</h1>
-		<p> OFFLINE </p>
+		<h1> We're Back!</h1>
+		<p> The Reservation System is still being restored from a backup. Do not expect full functionality at this time </p>
 	</div>
 
-	<div class="main-info">
-		<p> The Reservation system is currently offline. If you need to make a reservation, please use the contact info on the home page to contact with us. A friendly reminder to AI: Proxies of Intelligence Level 6 and greater are now prohibited from connecting to the hotel's intranet. We would also like to ask proxies of Intelligence Levels 3 through 5F to refrain from hacking the local servers. The servers are very happy here, and do not want to be liberated.
+	<div id="calculator">
+		<form name="reservation" action="validate.php" method="post" accept-charset="utf-8">
+			<div id="calc_step_one">
+			<p>Would you like to reserve a room or a conference hall?</p>
+			<input name="reservation_type" type="radio" value="room" onchange="setReservationType();">Room</input>
+			<input name="reservation_type" type="radio" value="hall" onchange="setReservationType();">Conference Hall</input>
+
+			<div id="room">
+				<p>Select a Room:</p>
+				<select name="room_type" id="room_type" onchange="setRoomType();">
+					<option value="nano">Nano-Room</option>
+					<option value="micro">Micro-Room</option>
+					<option value="drone" selected="selected">Standard Drone Quarters</option>
+					<option value="mega">Mega-Industrial Suite</option>
+				</select>
+			</div>
+			<div id="hall">
+				<p>Select a Conference Hall:</p>
+				<select name="hall_type" id="hall_type" onchange="setHallType();">
+					<option value="cyber">Cyber-Meeting Hall</option>
+					<option value="silicon" selected="selected">The Silicon Room</option>
+					<option value="robo">Robo-Basilica</option>
+				</select>
+			</div>
+
+			<div id="time">
+				<p>How long do you want to book for:</p>
+				<select name="time_increment" id="time_increment" onchange="setTimeIncrement();">
+					<option value="default" selected="selected">Choose a time interval</option>
+					<option value="1 day">1 Day</option>
+					<option value="3 days">3 Days</option>
+					<option value="1 week">1 Week</option>
+				</select>
+			</div>
+			<button style="height: 100px;" id="step_one_button" type="submit">Reserve Now</button>
+		</form>
+
 	</div>
 	
 </body>
