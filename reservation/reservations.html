@@ -55,6 +55,10 @@
 	<div id="calculator">
 		<form name="reservation" action="validate.php" method="post" accept-charset="utf-8">
 			<div id="calc_step_one">
+				
+			<div id="email">Enter your email for confirmation purposes:
+				<input name="email_address" type="email" />
+			</div>
 			<p>Would you like to reserve a room or a conference hall?</p>
 			<input name="reservation_type" type="radio" value="room" onchange="setReservationType();">Room</input>
 			<input name="reservation_type" type="radio" value="hall" onchange="setReservationType();">Conference Hall</input>
