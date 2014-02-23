@@ -72,8 +72,9 @@ function setTimeIncrement() {
 
 	// If this is the first time we're making a selection,
 	// Show the Calculate Button
-	var $select = $('#time_increment');
-	if ($select.val() !== "default") {
+	var $start = $('#start_datepicker');
+	var $end = $('#end_datepicker');
+	if ($start.val() !== "" && $end.val() !== "") {
 		$('#step_one_button').show();
 	}
 }
@@ -83,11 +84,14 @@ function setTimeIncrement() {
 // displays, with the display function as a callback to the calculate function
 function calculateAndDisplay() {
 	// First, let's grab the variables that matter
+	// TODO: Validate that the dates are dates
+	var start = new Date($('#start_datepicker').val());
+	var end = new Date($('#end_datepicker').val());
 
-	var time_type = $('#time_increment').val();
-	console.log(time_type);
-	var time = timeBaseMultiplier[time_type];
-	console.log(time);
+	// Date logic made easy thanks to DP_DateExtensions
+	var duration = start.diff(end, 'days');
+	console.log("Duration is: ", duration);
+
 
 	var type = $('#calc_step_one>input[type=radio][name=reservation_type]:checked').val();
 	console.log(type);

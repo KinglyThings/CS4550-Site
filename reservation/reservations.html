@@ -8,8 +8,11 @@
 
 	<!-- CSS and JS files -->
 	<link href="/static/css/reservation.css" media="all" rel="stylesheet" type="text/css">
+	<link href="/static/css/jquery-ui-1.10.4.custom.min.css" rel="stylesheet" type="text/css">
 
 	<script src="/static/js/jquery-1.10.2.min.js"></script>
+	<script src="/static/js/jquery-ui-1.10.4.custom.min.js"></script>
+	<script src="/static/js/DP_DateExtensions.js"></script>
 
 	<!-- Load the Calculator Js before the page has loaded -->
 	<script src="/static/js/reservationCalculator.js"></script>
@@ -20,6 +23,10 @@
 			$('#calculator').hide();
 		    $('#results').hide();
 		    openCalculator();
+
+		    // Initialize the datepickers
+   			$("#start_datepicker").datepicker({ dateFormat: "yy-mm-dd", minDate: "+200Y", maxDate: "+250Y" });
+   			$("#end_datepicker").datepicker({ dateFormat: "yy-mm-dd", minDate: "+200Y", maxDate: "+250Y" });
 		};
 	</script>
 
@@ -59,6 +66,9 @@
 			<div id="email">Enter your email for confirmation purposes:
 				<input name="email_address" type="email" />
 			</div>
+			<div id="serial_number">Enter your serial number for identification purposes:
+				<input name="serial_number" type="text" />
+			</div>
 			<p>Would you like to reserve a room or a conference hall?</p>
 			<input name="reservation_type" type="radio" value="room" onchange="setReservationType();">Room</input>
 			<input name="reservation_type" type="radio" value="hall" onchange="setReservationType();">Conference Hall</input>
@@ -82,14 +92,11 @@
 			</div>
 
 			<div id="time">
-				<p>How long do you want to book for:</p>
-				<select name="time_increment" id="time_increment" onchange="setTimeIncrement();">
-					<option value="default" selected="selected">Choose a time interval</option>
-					<option value="1 day">1 Day</option>
-					<option value="3 days">3 Days</option>
-					<option value="1 week">1 Week</option>
-				</select>
+				<p>Enter the time range you want to book for: </p>
+				<p>Start: <input name="start_date" type="text" id="start_datepicker" onchange="setTimeIncrement();" /></p>
+				<p>End: <input name="end_date" type="text" id="end_datepicker" onchange="setTimeIncrement();" /></p>
 			</div>
+
 			<button style="height: 100px;" id="step_one_button" type="submit">Reserve Now</button>
 		</form>
 
