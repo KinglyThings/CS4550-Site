@@ -8,6 +8,13 @@
 
 	<!-- CSS and JS files -->
 	<link href="/static/css/reservation.css" media="all" rel="stylesheet" type="text/css">
+	<link href="/static/css/jquery-ui-1.10.4.custom.min.css" rel="stylesheet" type="text/css">
+
+	<script src="/static/js/jquery-1.10.2.min.js"></script>
+	<script src="/static/js/jquery-ui-1.10.4.custom.min.js"></script>
+
+	<!-- Load the Slideshow Js before the page has loaded -->
+	<script src="/static/js/slideshow.js"></script>
 </head>
 <body>
 	<div class="header-container">
@@ -32,12 +39,14 @@
 	<!-- The vertical info bar on the left side of the screen -->
 	<!-- Rename div id to reflect page contents better, even though it uses same styles? -->
 	<!-- GAH, inline styles. TODO: Move this to the stylesheet when I have more time -->
-	<div id="contact-info" style="background-color:#F22">
-		<h1>Notice:</h1>
-		<p> In light of the recent attack on the Annual Cyber Summit, we have decided to ban access to the hotel intranet to Artificial Intelligences with reasoning capabilities of IL-6-A and above outside of the Cyber-Meeting Hall. Hyper-intelligent guests are still able to enjoy all the other amenities we have to offer.</p>
+	<div id="contact-info" style="background-color:#F22; height:450px;">
+		<img id="slide" height="350px" width="350px" src="/static/images/room2.jpg" />
+		<br />
+		<div class="slide_button" onclick="prevSlide();">Prev</div>
+		<div class="slide_button" onclick="nextSlide();">Next</div>
 	</div>
 
-	<div class="main-info">
+	<div class="main-info" style="height:450px;">
 		<p> We have a variety of rooms to offer, including:</p>
 		<ul>
 			<li>Petite individual rooms, designed for nanobots on-the-go</li>
