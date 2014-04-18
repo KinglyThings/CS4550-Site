@@ -1,0 +1,90 @@
+@import url(http://fonts.googleapis.com/css?family=Keania+One);
+
+html, body {
+    padding: 10px;
+}
+
+#navbar {
+
+    /* Sizing and Border */
+    border: 4px solid #27ae60;
+    min-height: 50px;
+    width: auto;
+    margin-bottom: 25px;
+
+    /* Background */
+    background-color: #34495e;
+
+    /* Fonts */
+    color: #ecf0f1;
+    font-size: 32px;
+    font-family: sans-serif;
+    font-weight: 900;
+    text-decoration: none;
+    text-align: center;
+}
+
+#navbar a:link {
+    text-decoration: none;
+    color: #ecf0f1;
+}
+
+#navbar a:visited {
+    text-decoration: none;
+    color: #ecf0f1
+}
+
+#navbar a:hover {
+    text-decoration: none;
+    color: #ecf0f1;
+}
+
+#navbar a:active {
+    text-decoration: none;
+    color: #ecf0f1;
+}
+
+#navbar a div {
+    border: 4px solid #27ae60;
+    background-color: #34495e;
+    transition: background-color 0.5s;
+    -webkit-transition: background-color 0.5s;
+
+}
+
+#navbar a div:hover {
+    background-color: #8e44ad;
+}
+
+#navbar a div:active {
+    background-color: #BF95D1;
+}
+
+
+.error-container {
+    border: 3px solid #27ae60;
+}
+
+span.error {
+    font-size: 16px;
+    font-weight: 700;
+    color: red;
+}
+
+#login_username_group {
+    margin-top: 40px;
+}
+
+#logo {
+    display: inline;
+}
+
+h1#title {
+    display: inline;
+    font-family: 'Keania One', sans-serif;
+    font-size: 5em;
+}
+
+.storycard {
+    border: 4px solid #27ae60;
+}
