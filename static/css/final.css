@@ -10,7 +10,7 @@ html, body {
     border: 4px solid #27ae60;
     min-height: 50px;
     width: auto;
-    margin-bottom: 25px;
+    margin-bottom: 20px;
 
     /* Background */
     background-color: #34495e;
@@ -87,4 +87,62 @@ h1#title {
 
 .storycard {
     border: 4px solid #27ae60;
+}
+
+#title-pane {
+    border: 4px solid #27ae60;
+    text-align: center;
+    background-color: #34495e;
+
+    color: #ecf0f1;
+    font-size: 32px;
+    font-family: sans-serif;
+    font-weight: 900;
+    text-decoration: none;
+}
+
+#text-pane {
+    border: 4px solid #27ae60;
+    text-align: center;
+    background-color: #34495e;
+
+    min-height: 475px;
+    max-height: 475px;
+    height: 475px;
+}
+
+#text-window {
+    border-left: 4px solid #27ae60;
+    border-right: 4px solid #27ae60;
+    text-align: center;
+    background-color: white;
+    color: black;
+    font-size: 1.2em;
+    font-family: Georgia, sans-serif;
+
+    min-height: 467px;
+    max-height: 467px;
+    height: 467px;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+#choice-pane {
+    border: 4px solid #27ae60;
+    background-color: #34495e;
+    text-align: center;
+    min-height: 475px;
+    max-height: 475px;
+    height: 475px;
+}
+
+.btn-choice {
+    font-size: 1.5em;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+span#the_end {
+    font-size: 3em;
+    color: white;
 }
