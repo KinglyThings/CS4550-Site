@@ -16,6 +16,7 @@ $parent = array();
 $choices = array();
 $error = "";
 $new = false;
+$revisit = false;
 
 // Base error cases
 if(!isset($_SESSION['logged_in'])) {
@@ -28,13 +29,16 @@ if(!isset($_SESSION['logged_in'])) {
     $error = "NO STORY ID";
 }
 
+// Connect to the database
+require_once('../mysqli_connect.php');
+
+// Connect to the database
+$connect_query = "USE final;";
+$connect_result = @mysqli_query($final_dbc, $connect_query);
+
 if(isset($_SESSION['logged_in']) && isset($_GET['story_id']) && !isset($_POST['submit'])) {
     // Run a database query to check if the user is allowed to edit the current story
-    require_once('../mysqli_connect.php');
-
-    // Connect to the database
-    $connect_query = "USE final;";
-    $connect_result = @mysqli_query($final_dbc, $connect_query);
+    
 
     $story_id = trim(stripslashes(htmlspecialchars($_GET['story_id'])));
 
@@ -167,7 +171,57 @@ if ($allowed_to_edit) {
     // Ok, we have the data-grabbing logic in place
     // Now, let's handle what happens if the form has been submitted.
     if (isset($_POST['submit'])) {
-        
+        $revisit = true;
+        // We need a story id
+
+        if (isset($_POST['story_id'])) {
+            $story_id = trim(stripslashes(htmlspecialchars($_POST['story_id'])));
+
+            // Check the database to make sure that this is a valid story
+            $check_story_query = "SELECT * FROM story WHERE story_id = " . mysqli_real_escape_string($final_dbc, $story_id) . ";";
+            $check_story_result = @mysqli_query($final_dbc, $check_story_query);
+
+            if (mysqli_num_rows($check_story_result)) {
+                // The story ID is valid, all is well
+            } else {
+                // The story ID is invalid
+                $errors[] = "The story you are updating is invalid.";
+            }
+        } else {
+            $errors[] = "The story you are updating does not exist.";
+        }
+
+        // If we have a card id AND a parent id, we'll use them both (but must validate that they are proper)
+        // IF we have a card id ONLY, we will query for the parent ID
+        // -  IF we find the parent ID in the database, all is well
+        // -  IF we do not find a parent ID, we will query for the first card in this story
+        //    -  IF we find that this card is the first card in this story, all is well
+        //    -  IF we find that this is not the first card in this story, ERROR
+        // IF we have a parent id ONLY, this means we are making a new card entirely
+        // - Validate that the parent id is a real card in the same story as this story_id and all is well
+        // IF we have neither, ERROR
+        if (empty($errors) && isset($_POST['card_id']) && isset($_POST['parent_id'])) {
+            $card_id = trim(stripslashes(htmlspecialchars($_POST['card_id'])));
+            $parent_id = trim(stripslashes(htmlspecialchars($_POST['parent_id'])));
+
+            // Check the database to ensure that these are valid
+            // 1.) Card_id and parent_id both need to represent cards in the same story as story_id
+            // 2.) There must be a row in the cardmap where parent_id and story_id map to card_id (Parent really is a parent)
+            // 3.) 
+        } else {
+            // Do nothing, this is a new card
+        }
+
+        // If we have a parent id, we'll need to update the parent table. 
+        // If we have a parent id, grab it
+        // If we don't, then this card MUST be the first card in its story
+        // Validate that it is, 
+        if (isset($_POST['parent_id'])) {
+            $parent_id = trim(stripslashes(htmlspecialchars($_POST['parent_id'])));
+        } else {
+            // There is no parent id
+            // Ensure that this card is the first card in its story
+        }
     }
 }
 ?>
@@ -181,6 +235,15 @@ if ($allowed_to_edit) {
 // The text that this choice leads to.
 // Links to edit the child cards
 
+// To start, only generate anything if there is no error with grabbing the story
+if ($error === "") {
+    // DO FORM STUFF
+
+    // Start by generating the hidden inputs
+    // These will contain the story id, the card id (if applicable), and the parent id (if applicable)
+} else {
+    echo '<div class="error-container"><span class="error">' . $error . '</span></div>';
+}
 ?>
 <?php require 'footer.php'; ?>
 </html>
