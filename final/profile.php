@@ -73,7 +73,7 @@ if (!$author_exists) {
     echo '<div class="error-container"><span class="error">This user does not exist!</span></div>';
 } else {
     echo '<h1>' . $author['username'] . '</h1><br />';
-    echo '<h3> Email: ' . $author['email'] . '</h3><br />';
+    echo '<h3> Email: ' . $author['email'] . '</h3>';
     // Show the stories
     if (empty($stories)) {
         echo '<div class="error-container">This user has not created any stories.</div>';

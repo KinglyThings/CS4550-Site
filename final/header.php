@@ -39,7 +39,7 @@ session_start();
 	</div>
     <div class="row" id="navbar">
         <a href="http://www.kinglythings.com/final/stories.php">
-            <div id="view_stories" class="col-offset-md-1 col-md-3">
+            <div id="view_stories" class="col-offset-md-1 col-md-4">
                 Read Stories
             </div>
         </a>
