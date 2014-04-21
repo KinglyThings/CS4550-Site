@@ -16,8 +16,8 @@ $new = false;
 $revisit = false;
 
 // This is a temporary measure until I've resolved the bug
-header("Location: http://www.kinglythings.com/final/index.php");
-exit;
+//header("Location: http://www.kinglythings.com/final/index.php");
+//exit;
 
 // Base error cases
 if(!isset($_SESSION['logged_in'])) {
@@ -456,7 +456,7 @@ if ($allowed_to_edit) {
                 foreach($insert_queries as $query) {
                     $result = @mysqli_query($final_dbc, $query);
                     if (!$result) {
-                        $errors[] = "Something went wrong with the meta-information insertion"
+                        $errors[] = "Something went wrong with the meta-information insertion";
                     }
                 }
             }
@@ -639,7 +639,7 @@ if ($error === "") {
 
     // If a parent id exists, add an input for it (proper validation will happen on form submission)
     if (isset($parent_id) && $parent_id !== "") {
-        echo '<input type="idden" name="parent_id" value="' . htmlentities($parent_id) . '">';
+        echo '<input type="hidden" name="parent_id" value="' . htmlentities($parent_id) . '">';
     }
 
     // Show the story title at the top
@@ -657,14 +657,16 @@ if ($error === "") {
     }
 
     // Show an option to edit the text of the choice that leads to this card, if it exists
-    echo '<div id="edit_story_choice_text_group" class="form-group">';
-    echo '<label for="edit_story_choice_text" class="col-sm-2 control-label">Choice Text: </label><div class="col-sm-4">';
-    if (isset($card_id) && isset($parent_id) && isset($choice_text)) {
-        echo '<input type="text" name="choice_text" class="form-control" id="edit_story_choice_text" placeholder="Enter the text that leads to this card here" maxlength="64" size="64" value=' . htmlentities($choice_text) . '>';
-    } else {
-        echo '<input type="text" name="choice_text" class="form-control" id="edit_story_choice_text" placeholder="Enter the text that leads to this card here" maxlength="64" size="64">';
+    if (isset($parent_id)) {
+        echo '<div id="edit_story_choice_text_group" class="form-group">';
+        echo '<label for="edit_story_choice_text" class="col-sm-2 control-label">Choice Text: </label><div class="col-sm-4">';
+        if (isset($card_id) && isset($parent_id) && isset($choice_text)) {
+            echo '<input type="text" name="choice_text" class="form-control" id="edit_story_choice_text" placeholder="Enter the text that leads to this card here" maxlength="64" size="64" value=' . htmlentities($choice_text) . '>';
+        } else {
+            echo '<input type="text" name="choice_text" class="form-control" id="edit_story_choice_text" placeholder="Enter the text that leads to this card here" maxlength="64" size="64">';
+        }
+        echo '</div></div>';
     }
-    echo '</div></div>';
     
     // Show An option to edit the text of THIS card
     echo '<div id="text-pane" class="col-sm-8"><div id="text-window">';
