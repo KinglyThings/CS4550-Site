@@ -308,8 +308,74 @@ if ($allowed_to_edit) {
         if (!isset($_POST['card_id'])) {
             $errors[] = "The card could not be located to be deleted.";
         }
+        $card_id = trim(stripslashes(htmlspecialchars($_POST['card_id'])));
 
-        // We need to determine the parent of this car
+        // Here are the things we need to delete for the card
+        // 1.) The actual card from the card table (found through card_id)
+        // 2.) All references in the parentmap table where this card is the child of another card
+        //     - It no longer exists, it can no longer be a child
+        // 3.) All references in the parentmap table where this card is the parent of another card
+        //     - It no longer exists, it can no longer be a parent
+        // 4.) All references in the cardmap table where this card is the parent of another card
+        //     - This card no longer has any choices that lead from it because it no longer exists
+        // 5.) All references in the cardmap table where this card is a choice of another card
+        //     - This card no longer exists, it can no longer be a valid choice
+        // 6.) All references in the first_card table (there will be exactly one reference if this is the first card of a story)
+        //     - This card no longer exists, it can no longer be a first card of a story
+        //     - If we are deleting the first card of a story, that means there are no more cards in the story
+        //     - In this event, delete ALL cards from the story
+
+
+        // OK, first, we need to check if this card is the first card in the story
+        $first_card_query = "SELECT * FROM first_card WHERE first_card_id = " . mysqli_real_escape_string($final_dbc, $card_id) . ";";
+        $first_card_result = @mysqli_query($final_dbc, $first_card_query);
+        $delete_queries = array();
+        if (mysqli_num_rows($first_card_result)) {
+            // This is the first card, delete everything
+
+            $delete_queries[] = "DELETE FROM card WHERE story_id = " . mysqli_real_escape_string($final_dbc, $story_id) . ";";
+            $delete_queries[] = "DELETE FROM parentmap WHERE story_id = " . mysqli_real_escape_string($final_dbc, $story_id) . ";";
+            $delete_queries[] = "DELETE FROM cardmap WHERE story_id = " . mysqli_real_escape_string($final_dbc, $story_id) . ";";
+            $delete_queries[] = "DELETE FROM first_card WHERE story_id = " . mysqli_real_escape_string($final_dbc, $story_id) . ";";
+        } else {
+            // This is not the first card, only delete things relating to this card
+            $delete_queries[] = "DELETE FROM card WHERE story_id = " . mysqli_real_escape_string($final_dbc, $story_id) . " AND card_id = " . mysqli_real_escape_string($final_dbc, $card_id) . ";";
+            $delete_queries[] = "DELETE FROM parentmap WHERE (story_id = " . mysqli_real_escape_string($final_dbc, $story_id) . ") AND ( child_id = " . mysqli_real_escape_string($final_dbc, $card_id) . " OR parent_id = " . mysqli_real_escape_string($final_dbc, $card_id) . ");";
+            $delete_queries[] = "DELETE FROM cardmap WHERE (story_id = " . mysqli_real_escape_string($final_dbc, $story_id) . ") AND ( card_id = " . mysqli_real_escape_string($final_dbc, $card_id) . " OR choice_id = " . mysqli_real_escape_string($final_dbc, $card_id) . ");";
+            
+            // Since this is not the first card, it must have a parent
+            // Find that parent and redirect to it upon completion of the delete
+            if (isset($_POST['parent_id'])) {
+                $parent_id = trim(stripslashes(htmlspecialchars($_POST['parent_id'])));
+            } else {
+                $find_parent_query = "SELECT * FROM parentmap WHERE child_id = " . mysqli_real_escape_string($final_dbc, $card_id) . " AND story_id = " . mysqli_real_escape_string($final_dbc, $story_id) . ";";
+                $find_parent_result = @mysqli_query($final_dbc, $find_parent_query);
+
+                if (mysqli_num_rows($find_parent_result)) {
+                    // We found the parent id
+                    $parent = mysqli_fetch_array($find_parent_result);
+                    $parent_id = $parent['parent_id'];
+                } else {
+                    $errors[] = "Could not find this parented card's parent for redirection purposes. Please try again later.";
+                }
+            }
+            if (empty($errors)) {
+                $redirect_url .= "&card_id=" . htmlentities($parent_id);
+            }
+        }
+
+        // Now that we know all of the delete queries we will need to run, run each of them
+        foreach($delete_queries as $query) {
+            $result = @mysqli_query($final_dbc, $query);
+            if (!$result) {
+                $errors[] = "Something went wrong with the deletion process. Please try again later.";
+            }
+        }
+
+        // Now, the delete is done. If there are still no errors, redirect to the parent card if it exists
+        // If the parent card does not exist, redirect to the first page of the story
+        header("Location: " . $redirect_url);
+        exit;
     }
 }
 ?>
