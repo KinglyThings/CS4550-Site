@@ -37,29 +37,42 @@ require_once('../mysqli_connect.php');
 $connect_query = "USE final;";
 $connect_result = @mysqli_query($final_dbc, $connect_query);
 
-if(isset($_SESSION['logged_in']) && isset($_GET['story_id']) && !isset($_POST['submit'])) {
+if(isset($_SESSION['logged_in'])) {
     // Run a database query to check if the user is allowed to edit the current story
     
-
-    $story_id = trim(stripslashes(htmlspecialchars($_GET['story_id'])));
+    // Ensure that there is a story ID (prefer the GET, then check the POST)
+    if (isset($_GET['story_id'])) {
+        $story_id = trim(stripslashes(htmlspecialchars($_GET['story_id'])));
+    } else if (isset($_POST['story_id'])) {
+        $story_id = trim(stripslashes(htmlspecialchars($_GET['story_id'])));
+    } else {
+        // No story id, illegal
+        $error = "NO STORY ID";
+        $errors[] = "NO STORY ID";
+    }
 
     $author_id = trim(stripslashes(htmlspecialchars($_SESSION['user_id'])));
 
-    // Now that we're connected to the database, we need to check
-    // if the user in the session is the author of the story, and
-    // if the story in question is editable
-    $editable_query = "SELECT * from story WHERE story_id = ";
-    $editable_query .= mysqli_real_escape_string($final_dbc, $story_id);
-    $editable_query .= " AND author_id = " . mysqli_real_escape_string($final_dbc, $author_id);
-    $editable_query .= " AND editable = 1;";
-    $editable_result = @mysqli_query($final_dbc, $editable_query);
+    if (empty($errors)) {
+        // Now that we're connected to the database, we need to check
+        // if the user in the session is the author of the story, and
+        // if the story in question is editable
+        $editable_query = "SELECT * from story WHERE story_id = ";
+        $editable_query .= mysqli_real_escape_string($final_dbc, $story_id);
+        $editable_query .= " AND author_id = " . mysqli_real_escape_string($final_dbc, $author_id);
+        $editable_query .= " AND editable = 1;";
+        $editable_result = @mysqli_query($final_dbc, $editable_query);
 
-    // If we get a result, then the story is editable by this user
-    if (mysqli_num_rows($editable_result)) {
-        $allowed_to_edit = true;
+        // If we get a result, then the story is editable by this user
+        if (mysqli_num_rows($editable_result)) {
+            $allowed_to_edit = true;
 
-        // Put the story information into the story array for later use
-        $story = mysqli_fetch_array($editable_result);
+            // Put the story information into the story array for later use
+            $story = mysqli_fetch_array($editable_result);
+        }
+    } else {
+        // NO STORY ID
+        $allowed_to_edit = false;
     }
 } else {
     // This user is not allowed to edit or the link is broken
@@ -484,12 +497,13 @@ if ($allowed_to_edit) {
             // If there are still no errors, then this will be the first card in the story
             // Choice text is irrelvant, so add the card are add it to the first_card table
             if (empty($errors)) {
-                $insert_query = "INSERT INTO card (story_id, text) VALUES (" . mysqli_real_escape_string($final_dbc, $story_id) . ", " . mysqli_real_escape_string($final_dbc, $text) . ");";
+                $insert_query = 'INSERT INTO card (story_id, text) VALUES (' . mysqli_real_escape_string($final_dbc, $story_id) . ", " . mysqli_real_escape_string($final_dbc, $text) . ");";
                 $insert_result = @mysqli_query($final_dbc, $insert_query);
 
                 if ($insert_result) {
                     $card_id = mysqli_insert_id($final_dbc);
                 } else {
+                    echo var_dump($insert_query);
                     $errors[] = "Unable to insert the first card in this story. Please try again later.";
                 }
             }
@@ -519,7 +533,7 @@ if ($allowed_to_edit) {
         // Afterwards, if we have a parent ID, redirect to the parent's page
         // Otherwise, if we have another card in the story, redirect to the first card in the story
         // If this the first and only card in the story, redirect to a blank edit page
-        $redirect_url = "http://www.kinglythings.com/final/edit-story?story_id=" . htmlentities($story_id);
+        $redirect_url = "http://www.kinglythings.com/final/edit-story.php?story_id=" . htmlentities($story_id);
 
         // Only delete if we have a card ID
         if (!isset($_POST['card_id'])) {
@@ -682,7 +696,8 @@ if ($error === "" && $allowed_to_edit) {
     echo '</div></div>';
 
     // Show an option to delete THIS CARD (and all of its subcards)
-    echo '<div class="form-group"><div class="col-sm-offset-2 col-sm-2>';
+    echo '<div id="choice-pane" class="col-sm-4">';
+    echo '<div class="form-group">';
     echo '<button type="submit" name="delete" role="button" class="btn btn-danger btn-lg" id="delete-button">Delete This Card</button>';
     echo '</div></div>';
 
