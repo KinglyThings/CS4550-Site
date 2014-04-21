@@ -106,14 +106,14 @@ if (!isset($_SESSION['logged_in'])) {
 
             if (empty($errors)) {
                 // The username is valid, let's create the story
-                $create_query = "INSERT INTO story (title, author_id, genre, private) VALUES ('";
-                $create_query .= mysqli_real_escape_string($final_dbc, $title) . "', (SELECT user_id FROM user WHERE username = '";
-                $create_query .= mysqli_real_escape_string($final_dbc, $username) . "'), '";
-                $create_query .= mysqli_real_escape_string($final_dbc, $genre) . "', '";
+                $create_query = "INSERT INTO story (title, author_id, genre, private) VALUES (";
+                $create_query .= mysqli_real_escape_string($final_dbc, $title) . ", (SELECT user_id FROM user WHERE username = ";
+                $create_query .= mysqli_real_escape_string($final_dbc, $username) . "), ";
+                $create_query .= mysqli_real_escape_string($final_dbc, $genre) . ", ";
                 if ($private) {
-                    $create_query .= "1');";
+                    $create_query .= "1);";
                 } else {
-                    $create_query .= "0');";
+                    $create_query .= "0);";
                 }
 
                 $create_result = @mysqli_query($final_dbc, $create_query);

@@ -146,3 +146,10 @@ span#the_end {
     font-size: 3em;
     color: white;
 }
+
+#edit_story_text {
+    height:400px;
+    border-left: 4px solid #27ae60;
+    border-right: 4px solid #27ae60;
+    border-bottom: 4px solid #27ae60;
+}

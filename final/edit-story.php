@@ -594,6 +594,9 @@ if ($allowed_to_edit) {
         header("Location: " . $redirect_url);
         exit;
     }
+} else {
+    // If we're in this block, we're not allowed to edit
+    $error = "YOU ARE NOT AUTHORIZED TO EDIT THIS STORY!";
 }
 ?>
 <!DOCTYPE html>
@@ -620,7 +623,7 @@ if ($allowed_to_edit) {
 // Links to edit the child cards
 
 // To start, only generate anything if there is no error with grabbing the story
-if ($error === "") {
+if ($error === "" && $allowed_to_edit) {
     // DO FORM STUFF
 
     // Start by generating the form and the hidden inputs
@@ -669,14 +672,14 @@ if ($error === "") {
     }
     
     // Show An option to edit the text of THIS card
-    echo '<div id="text-pane" class="col-sm-8"><div id="text-window">';
+    echo '<div id="text-pane" class="col-sm-8">';
     echo '<div id="text_group" class="form-group">';
     if (isset($card_id) && !empty($card)) {
-        echo '<textarea id="edit_story_text" name="text" class="form-control" placeholder="Enter story text here!">' . htmlentities($card['text']) . '</textarea>';
+        echo '<textarea rows="25" id="edit_story_text" name="text" class="form-control" placeholder="Enter story text here!">' . htmlentities($card['text']) . '</textarea>';
     } else {
-        echo '<textarea id="edit_story_text" name="text" class="form-control" placeholder="Enter story text here!"></textarea>';
+        echo '<textarea rows="25" id="edit_story_text" name="text" class="form-control" placeholder="Enter story text here!"></textarea>';
     }
-    echo '</div></div></div>';
+    echo '</div></div>';
 
     // Show an option to delete THIS CARD (and all of its subcards)
     echo '<div class="form-group"><div class="col-sm-offset-2 col-sm-2>';
