@@ -215,12 +215,7 @@ if ($allowed_to_edit) {
 
         // Validation of the different form components (Text of this option, choice text)
 
-        // Validate the choice text
-        if (isset($_POST['choice_text'])) {
-            $choice_text = trim(stripslashes($_POST['choice_text']));
-        } else {
-            $errors[] = "A choice must have text associated with it!";
-        }
+        
 
         // Validate the body text
         if (isset($_POST['text'])) {
@@ -301,36 +296,179 @@ if ($allowed_to_edit) {
                 }
             }
 
-            // If we reach this point, the card and parent id are valid and we have valid changes to make
+            // If there are no errors yet, validate the choice text that leads to this card
+            // (This is done in this block because for first cards, we cannot do this)
+            if (empty($errors)) {
+                // Validate the choice text
+                if (isset($_POST['choice_text'])) {
+                    $choice_text = trim(stripslashes($_POST['choice_text']));
+                } else {
+                    $errors[] = "A choice must have text associated with it!";
+                }
+            }
+            // If we reach this point without errors, the card and parent id are valid and we have valid changes to make
             // We will need to:
             // 1.) Update the card text in the card table
             // 2.) Update the choice text in cardmap table
-            $update_queries = array();
-            $update_queries[] = "UPDATE card SET text = " . mysqli_real_escape_string($final_dbc, $text) . " WHERE story_id = " . mysqli_real_escape_string($final_dbc, $story_id) . " AND card_id = " . mysqli_real_escape_string($final_dbc, $card_id) . ";";
-            $update_queries[] = "UPDATE cardmap SET choice_text = " . mysqli_real_escape_string($final_dbc, $choice_text) . " WHERE story_id = " . mysqli_real_escape_string($final_dbc, $story_id) . " AND card_id = " . mysqli_real_escape_string($final_dbc, $parent_id) . " AND choice_id = " . mysqli_real_escape_string($final_dbc, $card_id) . ";";
+            if (empty($errors)) {
+                $update_queries = array();
+                $update_queries[] = "UPDATE card SET text = " . mysqli_real_escape_string($final_dbc, $text) . " WHERE story_id = " . mysqli_real_escape_string($final_dbc, $story_id) . " AND card_id = " . mysqli_real_escape_string($final_dbc, $card_id) . ";";
+                $update_queries[] = "UPDATE cardmap SET choice_text = " . mysqli_real_escape_string($final_dbc, $choice_text) . " WHERE story_id = " . mysqli_real_escape_string($final_dbc, $story_id) . " AND card_id = " . mysqli_real_escape_string($final_dbc, $parent_id) . " AND choice_id = " . mysqli_real_escape_string($final_dbc, $card_id) . ";";
 
-            // Exceute all of the update queries
-            foreach ($update_queries as $query) {
-                $result = @mysqli_query($final_dbc, $query);
-                if (!$result) {
-                    $errors[] = "There was an error with the update process. Please try again later.";
+                // Exceute all of the update queries
+                foreach ($update_queries as $query) {
+                    $result = @mysqli_query($final_dbc, $query);
+                    if (!$result) {
+                        $errors[] = "There was an error with the update process. Please try again later.";
+                    }
                 }
+
+                // If there are still no errors after performing all the updates, reload the page with the new information
+                // TODO: Do this by AJAX
+                $redirect_url = "http://www.kinglythings.com/final/edit-story.php?story_id=" . htmlentities($story_id);
+                $redirect_url .= "&card_id=" . htmlentities($card_id) . "&parent_id=" . htmlentities($parent_id);
+                header("Location: " . $redirect_url);
+                exit;
             }
-
-            // If there are still no errors after performing all the updates, reload the page with the new information
-            // TODO: Do this by AJAX
-            $redirect_url = "http://www.kinglythings.com/final/edit-story.php?story_id=" . htmlentities($story_id);
-            $redirect_url .= "&card_id=" . htmlentities($card_id) . "&parent_id=" . htmlentities($parent_id);
-            header("Location: " . $redirect_url);
-            exit;
-
-
         } else if (empty($errors) && isset($_POST['card_id'])) {
             // We have a card id, but we have to validate that it has a parent or is the first card
             $card_id = trim(stripslashes(htmlspecialchars($_POST['card_id'])));
-        } else if (empty($errors) && isset($_POST['parent_id'])) {
 
+            $parent_query = "SELECT * FROM parentmap WHERE child_id = " . mysqli_real_escape_string($final_dbc, $card_id);
+            $parent_query .= " AND story_id = " . mysqli_real_escape_string($final_dbc, $story_id) . ";";
+            $parent_result = @mysqli_query($final_dbc, $parent_query);
+            
+            $is_first_card = false;
+
+            if (mysqli_num_rows($parent_result)) {
+                // Store the result into the $parent array
+                $row = mysqli_fetch_array($parent_result);
+                $parent_id = $row['parent_id'];
+            } else {
+                // There is no parent to this card
+                // If it is the first card, all is well
+                // If not, error
+                $first_card_query = "SELECT * FROM first_card WHERE story_id = " . mysqli_real_escape_string($final_dbc, $story_id) . ';';
+                $first_card_result = @mysqli_query($final_dbc, $first_card_query);
+                
+
+                if (mysqli_num_rows($parent_result)) {
+                    // This is the first card, all is well
+                    $is_first_card = true;
+                } else {
+                    // This is not the first card and it has no parent, but it exists. This is impossible.
+                    $errors[] = "Impossible card variant.";
+                }
+            }
+
+            // If we have no errors, we now have a valid card+parent combo, or a valid card that is the first card
+            // as well as valid input
+            // Update the database accordingly
+            if (empty($errors) && $is_first_card) {
+                // We're updating the first card
+                // We just need to change the card database
+                $update_query = "UPDATE card SET text = " . mysqli_real_escape_string($final_dbc, $text) . ";";
+                $update_result = @mysqli_query($final_dbc, $update_query);
+
+                if (!$result) {
+                    $errors[] = "There was an error updating the first card in the story.";
+                }
+
+                if (empty($errors)) {
+                    $redirect_url = "http://www.kinglythings.com/final/edit-story.php?story_id=" . htmlentities($story_id);
+                    header("Location: " . $redirect_url);
+                    exit;
+                }
+            } else if (empty($errors) && !$is_first_card) {
+                // We're updating a child card
+                // We need to update all the things
+
+                // Validate the choice text
+                if (isset($_POST['choice_text'])) {
+                    $choice_text = trim(stripslashes($_POST['choice_text']));
+                } else {
+                    $errors[] = "A choice must have text associated with it!";
+                }
+
+                if (empty($errors)) {
+                    $update_queries = array();
+                    $update_queries[] = "UPDATE card SET text = " . mysqli_real_escape_string($final_dbc, $text) . " WHERE story_id = " . mysqli_real_escape_string($final_dbc, $story_id) . " AND card_id = " . mysqli_real_escape_string($final_dbc, $card_id) . ";";
+                    $update_queries[] = "UPDATE cardmap SET choice_text = " . mysqli_real_escape_string($final_dbc, $choice_text) . " WHERE story_id = " . mysqli_real_escape_string($final_dbc, $story_id) . " AND card_id = " . mysqli_real_escape_string($final_dbc, $parent_id) . " AND choice_id = " . mysqli_real_escape_string($final_dbc, $card_id) . ";";
+
+                    foreach ($update_queries as $query) {
+                        $result = @mysqli_query($final_dbc, $query);
+                        if (!$result) {
+                            $errors[] = "There was a problem with the update process for this existing card with an existing parent, but no parent id initially provided";
+                        }
+                    }
+                }
+
+                if (empty($errors)) {
+                    // If the update was successfully, reload the page with a get request
+                    $redirect_url = "http://www.kinglythings.com/final/edit-story.php?story_id=" . htmlentities($story_id);
+                    header("Location: " . $redirect_url);
+                    exit;
+                }
+            }
+        } else if (empty($errors) && isset($_POST['parent_id'])) {
+            // This is a new card being created for the parent
             $parent_id = trim(stripslashes(htmlspecialchars($_POST['parent_id'])));
+
+            // Ensure the parent ID is a real card
+            $check_parent_query = "SELECT * FROM card where story_id = " . mysqli_real_escape_string($final_dbc, $story_id);
+            $check_parent_query .= " AND card_id = " . mysqli_real_escape_string($final_dbc, $parent_id) . ";";
+            $check_parent_result = @mysqli_query($final_dbc, $check_parent_query);
+
+            if (mysqli_num_rows($check_parent_result)) {
+                $parent = mysqli_fetch_array($check_parent_result);
+            } else {
+                $errors[] = "The card cannot be created because the parent provided was invalid.";
+            }
+
+            // Validate the choice text
+            if (isset($_POST['choice_text'])) {
+                $choice_text = trim(stripslashes($_POST['choice_text']));
+            } else {
+                $errors[] = "A choice must have text associated with it!";
+            }
+
+            // If there are no errors, create the card
+            if (empty($errors)) {
+                // TODO: Do all of these queries in one transaction so that it can be rolled back
+                $insert_queries = array();
+                $create_query = "INSERT INTO card (story_id, text) VALUES ( " . mysqli_real_escape_string($final_dbc, $story_id) . ", " . mysqli_real_escape_string($final_dbc, $text) . ");";
+                // Since we need the card id to do everything else, create this first and then use the resuling insert id
+                $create_result = @mysqli_query($final_dbc, $create_query);
+
+                if ($create_result) {
+                    $card_id = mysqli_insert_id($final_dbc);
+                } else {
+                    $errors[] = "Unable to create card. Please try again later.";
+                }
+            }
+
+            if (empty($errors)) {
+                // The card is now created, let's add everything else
+                $insert_queries[] = "INSERT INTO parentmap (story_id, parent_id, child_id) VALUES (" . mysqli_real_escape_string($final_dbc, $story_id) . ", " . mysqli_real_escape_string($final_dbc, $parent_id) . ", " . mysqli_real_escape_string($final_dbc, $card_id) . ");";
+                $insert_queries[] = "INSERT INTO cardmap (story_id, card_id, choice_id, choice_text) VALUES (" . mysqli_real_escape_string($final_dbc, $story_id) . ", " . mysqli_real_escape_string($final_dbc, $parent_id) . ", " . mysqli_real_escape_string($final_dbc, $card_id) . ", " . mysqli_real_escape_string($final_dbc, $choice_text) . ");";
+
+                // Run the queries
+                foreach($insert_queries as $query) {
+                    $result = @mysqli_query($final_dbc, $query);
+                    if (!$result) {
+                        $errors[] = "Something went wrong with the meta-information insertion"
+                    }
+                }
+            }
+
+            // Now that everything has been added, reload the page if there are no errors
+            if (empty($errors)) {
+                $redirect_url = "http://www.kinglythings.com/final/edit-story.php?story_id=" . htmlentities($story_id);
+                $redirect_url .= "&card_id=" . htmlentities($card_id) . "&parent_id=" . htmlentities($parent_id);
+                header("Location: " . $redirect_url);
+                exit;
+            }
+
         } else if (empty($errors)) {
             // We have no card id or parent id
             // We need to make this the first card in the story
@@ -341,6 +479,36 @@ if ($allowed_to_edit) {
             // If we get any results, then this is bad
             if (mysqli_num_rows($empty_story_result)) {
                 $errors[] = "Your story has come unglued. God help you.";
+            }
+
+            // If there are still no errors, then this will be the first card in the story
+            // Choice text is irrelvant, so add the card are add it to the first_card table
+            if (empty($errors)) {
+                $insert_query = "INSERT INTO card (story_id, text) VALUES (" . mysqli_real_escape_string($final_dbc, $story_id) . ", " . mysqli_real_escape_string($final_dbc, $text) . ");";
+                $insert_result = @mysqli_query($final_dbc, $insert_query);
+
+                if ($insert_result) {
+                    $card_id = mysqli_insert_id($final_dbc);
+                } else {
+                    $errors[] = "Unable to insert the first card in this story. Please try again later.";
+                }
+            }
+
+            // Now, all that's left is to add this to the first_card database table
+            if (empty($errors)) {
+                $insert_query = "INSERT INTO first_card (story_id, card_id) VALUES (" . mysqli_real_escape_string($final_dbc, $story_id) . ", " . mysqli_real_escape_string($final_dbc, $card_id) . ");";
+                $insert_result = @mysqli_query($final_dbc, $insert_query);
+
+                if (!$insert_result) {
+                    $errors[] = "Unable to set this card as the first card in the story";
+                }
+            }
+
+            // If there are still no errors, redirect to this page
+            if (empty($errors)) {
+                $redirect_url = "http://www.kinglythings.com/final/edit-story.php?story_id=" . htmlentities($story_id) . "&card_id=" . htmlentities($card_id);
+                header("Location: " . $redirect_url);
+                exit;
             }
 
         }
@@ -489,7 +657,7 @@ if ($error === "") {
     }
 
     // Show an option to edit the text of the choice that leads to this card, if it exists
-    echo '<div id="edit_story_choice_text_group" class="form-group">'
+    echo '<div id="edit_story_choice_text_group" class="form-group">';
     echo '<label for="edit_story_choice_text" class="col-sm-2 control-label">Choice Text: </label><div class="col-sm-4">';
     if (isset($card_id) && isset($parent_id) && isset($choice_text)) {
         echo '<input type="text" name="choice_text" class="form-control" id="edit_story_choice_text" placeholder="Enter the text that leads to this card here" maxlength="64" size="64" value=' . htmlentities($choice_text) . '>';
