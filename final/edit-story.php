@@ -215,6 +215,19 @@ if ($allowed_to_edit) {
 
         // Validation of the different form components (Text of this option, choice text)
 
+        // Validate the choice text
+        if (isset($_POST['choice_text'])) {
+            $choice_text = trim(stripslashes($_POST['choice_text']));
+        } else {
+            $errors[] = "A choice must have text associated with it!";
+        }
+
+        // Validate the body text
+        if (isset($_POST['text'])) {
+            $test = trim(stripslashes($_POST['text']));
+        } else {
+            $errors[] = "A choice MUST have text associated with it.";
+        }
 
         // If we have a card id AND a parent id, we'll use them both (but must validate that they are proper)
         // IF we have a card id ONLY, we will query for the parent ID
@@ -232,53 +245,93 @@ if ($allowed_to_edit) {
             // A card cannot be its own parent
             if ($card_id === $parent_id) {
                 $errors[] = "This card is somehow its own parent. Recursion is unethical.";
-            } else {
+            }
 
-                // Check the database to ensure that these are valid
-                // 1.) Card_id and parent_id both need to represent cards in the same story as story_id
-                // 2.) There must be a row in the cardmap where parent_id and story_id map to card_id (Parent really is a parent)
-                // 3.) There must be a row in the parentmap where parent_id is paired to card ID
-                $check_query_one = "SELECT * FROM card WHERE story_id = " . mysqli_real_escape_string($final_dbc, $story_id);
-                $check_query_one .= " AND card_id IN (" . mysqli_real_escape_string($final_dbc, $card_id) . ", ";
-                $check_query_one .= mysqli_real_escape_string($final_dbc, $parent_id) . ");";
-                $check_result_one = @mysqli_query($final_dbc, $check_query_one);
+            // If there are no errors, run the first check to see if the card_id is a valid card
+            // If it is, store the card info in the $card array
+            // Otherwise, error
+            if (empty($errors)) {
+                $card_query = "SELECT * FROM card WHERE story_id = " . mysqli_real_escape_string($final_dbc, $story_id);
+                $card_query .= " AND card_id = " . mysqli_real_escape_string($final_dbc, $card_id) . ";";
+                $card_result = @mysqli_query($final_dbc, $card_query);
 
-                // We need to get back EXACTLY two results
-                if (mysqli_num_rows($check_result_one) === 2) {
-                    // We've got a valid story ID and two valid card IDs, now let's make sure that
-                    // the parent_id is really the parent of the card_id
-                    $check_query_two = "SELECT * FROM cardmap WHERE story_id = " . mysqli_real_escape_string($final_dbc, $story_id);
-                    $check_query_two .= " AND card_id = " . mysqli_real_escape_string($final_dbc, $parent_id);
-                    $check_query_two .= " AND choice_id = " . mysqli_real_escape_string($final_dbc, $card_id) . ";";
-                    $check_result_two = @mysqli_query($final_dbc, $check_query_two);
-
-                    // If we get a result back from this, then we just need to confirm that the parentmap row exists
-                    if (mysqli_num_rows($check_result_two)) {
-                        $check_query_three = "SELECT * FROM parentmap WHERE story_id = " . mysqli_real_escape_string($final_dbc, $story_id);
-                        $check_query_three .= " AND parent_id = " . mysqli_real_escape_string($final_dbc, $parent_id);
-                        $check_query_three .= "AND child_id = " . mysqli_real_escape_string($final_dbc, $card_id) . ";";
-                        $check_result_three = @mysqli_query($final_dbc, $check_query_three);
-
-                        if (mysqli_num_rows($check_result_three)) {
-                            // All is well, card id and parent id are fine, proceed with processing
-                            // We need ()
-                        } else {
-                            $errors[] = "Improper parent card.";
-                        }
-                    } else {
-                        $errors[] = "Improper parent card.";
-                    }
+                if (mysqli_num_rows($card_result)) {
+                    $card = mysqli_fetch_array($card_result);
                 } else {
-                    $errors[] = "Card ID not found";
+                    $errors[] = "Invalid card to update";
                 }
             }
+
+            // If there are no errors, run the second check to see if the parent_id is a valid card
+            // If it is, store the card info in the $parent array
+            // Otherwise, erro
+            if (empty($errors)) {
+                $parent_query = "SELECT * FROM card WHERE story_id = " . mysqli_real_escape_string($final_dbc, $story_id);
+                $parent_query .= " AND card_id = ". mysqli_real_escape_string($final_dbc, $parent_id) . ";";
+                $parent_result = @mysqli_query($final_dbc, $parent_query);
+
+                if (mysqli_num_rows($final_dbc, $parent_result)) {
+                    $parent = mysqli_fetch_array($parent_result);
+                } else {
+                    $errors[] = "Invalid parent to update";
+                }
+            }
+
+            // If there are no errors, confirm that the given parent is a parent of the given card
+            if (empty($errors)) {
+                $is_parent_query = "SELECT * FROM parentmap WHERE story_id = " . mysqli_real_escape_string($final_dbc, $story_id);
+                $is_parent_query .= " AND parent_id = " . mysqli_real_escape_string($final_dbc, $parent_id);
+                $is_parent_query .= " AND child_id = " . mysqli_real_escape_string($final_dbc, $card_id) . ";";
+                $is_parent_result = @mysqli_query($final_dbc, $is_parent_query);
+
+                if (!mysqli_num_rows($is_parent_result)) {
+                    $errors[] = "The given parent is not really a parent of the given child.";
+                }
+            }
+
+            // If there are still no errors, confirm that the given child is a valid choice of the given parent
+            if (empty($errors)) {
+                $is_choice_query = "SELECT * FROM cardmap WHERE story_id = " . mysqli_real_escape_string($final_dbc, $story_id);
+                $is_choice_query .= " AND card_id = " . mysqli_real_escape_string($final_dbc, $parent_id);
+                $is_choice_query .= " AND choice_id = " . mysqli_real_escape_string($final_dbc, $card_id);
+                $is_choice_result = @mysqli_query($final_dbc, $is_choice_query);
+
+                if (!mysqli_num_rows($is_choice_result)) {
+                    $errors[] = "The given card is not a valid choice of its given parent.";
+                }
+            }
+
+            // If we reach this point, the card and parent id are valid and we have valid changes to make
+            // We will need to:
+            // 1.) Update the card text in the card table
+            // 2.) Update the choice text in cardmap table
+            $update_queries = array();
+            $update_queries[] = "UPDATE card SET text = " . mysqli_real_escape_string($final_dbc, $text) . " WHERE story_id = " . mysqli_real_escape_string($final_dbc, $story_id) . " AND card_id = " . mysqli_real_escape_string($final_dbc, $card_id) . ";";
+            $update_queries[] = "UPDATE cardmap SET choice_text = " . mysqli_real_escape_string($final_dbc, $choice_text) . " WHERE story_id = " . mysqli_real_escape_string($final_dbc, $story_id) . " AND card_id = " . mysqli_real_escape_string($final_dbc, $parent_id) . " AND choice_id = " . mysqli_real_escape_string($final_dbc, $card_id) . ";";
+
+            // Exceute all of the update queries
+            foreach ($update_queries as $query) {
+                $result = @mysqli_query($final_dbc, $query);
+                if (!$result) {
+                    $errors[] = "There was an error with the update process. Please try again later.";
+                }
+            }
+
+            // If there are still no errors after performing all the updates, reload the page with the new information
+            // TODO: Do this by AJAX
+            $redirect_url = "http://www.kinglythings.com/final/edit-story.php?story_id=" . htmlentities($story_id);
+            $redirect_url .= "&card_id=" . htmlentities($card_id) . "&parent_id=" . htmlentities($parent_id);
+            header("Location: " . $redirect_url);
+            exit;
+
+
         } else if (empty($errors) && isset($_POST['card_id'])) {
             // We have a card id, but we have to validate that it has a parent or is the first card
             $card_id = trim(stripslashes(htmlspecialchars($_POST['card_id'])));
         } else if (empty($errors) && isset($_POST['parent_id'])) {
 
             $parent_id = trim(stripslashes(htmlspecialchars($_POST['parent_id'])));
-        } else {
+        } else if (empty($errors)) {
             // We have no card id or parent id
             // We need to make this the first card in the story
             // First, validate that there are no cards in this story
@@ -288,12 +341,8 @@ if ($allowed_to_edit) {
             // If we get any results, then this is bad
             if (mysqli_num_rows($empty_story_result)) {
                 $errors[] = "Your story has come unglued. God help you.";
-            } else {
-                // IF we're here, that means the story is empty and we're making the first entry. 
-                // All is well
             }
 
-            // If there are no errors yet, then this story is empty
         }
     } else if (isset($_POST['delete'])) {
         // If we're deleting the card, then things are easier
@@ -408,7 +457,7 @@ if ($error === "") {
 
     // Start by generating the form and the hidden inputs
     // These will contain the story id, the card id (if applicable), and the parent id (if applicable)
-    echo '<form class="form-horizontal" role="form" action="" method="post">';
+    echo '<form class="form-horizontal" role="form" action="" method="post" accept-charset="UTF-8">';
 
     // If there's not a story_id, this page must have an error
     echo '<input type="hidden" name="story_id" value="' . htmlentities($story_id) . '">';
