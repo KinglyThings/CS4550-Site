@@ -172,7 +172,9 @@ if ($allowed_to_edit) {
             // If we reach this block, then the parent id is invalid
             $error = "INVALID PARENT CARD";
         }
-    } else {
+    } else if (!isset($_GET['card_id']) && !isset($_GET['parent_id']) && empty($_POST)) {
+        // WE SHOULD ONLY REACH THIS BLOCK ON GET REQUESTS (NOT POST FOR SUBMIT OR DELETE)
+        // WE SHOULD ONLY REACH THIS BLOCK IF WE ONLY HAVE A STORY ID
         // If we get here, then the user is logged in and able to edit the story, but
         // no card or parent id is set.
         // Open up the first card in the story if possible, otherwise start a new card that will be the first
@@ -497,20 +499,19 @@ if ($allowed_to_edit) {
             // If there are still no errors, then this will be the first card in the story
             // Choice text is irrelvant, so add the card are add it to the first_card table
             if (empty($errors)) {
-                $insert_query = 'INSERT INTO card (story_id, story_text) VALUES (' . mysqli_real_escape_string($final_dbc, $story_id) . ", " . mysqli_real_escape_string($final_dbc, $story_text) . ");";
+                $insert_query = 'INSERT INTO card (story_id, story_text) VALUES (' . mysqli_real_escape_string($final_dbc, $story_id) . ", '" . mysqli_real_escape_string($final_dbc, $story_text) . "');";
                 $insert_result = @mysqli_query($final_dbc, $insert_query);
 
                 if ($insert_result) {
                     $card_id = mysqli_insert_id($final_dbc);
                 } else {
-                    echo var_dump($insert_query);
                     $errors[] = "Unable to insert the first card in this story. Please try again later.";
                 }
             }
 
             // Now, all that's left is to add this to the first_card database table
             if (empty($errors)) {
-                $insert_query = "INSERT INTO first_card (story_id, card_id) VALUES (" . mysqli_real_escape_string($final_dbc, $story_id) . ", " . mysqli_real_escape_string($final_dbc, $card_id) . ");";
+                $insert_query = "INSERT INTO first_card (story_id, first_card_id) VALUES (" . mysqli_real_escape_string($final_dbc, $story_id) . ", " . mysqli_real_escape_string($final_dbc, $card_id) . ");";
                 $insert_result = @mysqli_query($final_dbc, $insert_query);
 
                 if (!$insert_result) {

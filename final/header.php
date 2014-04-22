@@ -40,7 +40,7 @@ session_start();
     <div class="row" id="navbar">
         <a href="http://www.kinglythings.com/final/stories.php">
             <div id="view_stories" class="col-offset-md-1 col-md-4">
-                Read Stories
+                Read!
             </div>
         </a>
         <?php if (isset($_SESSION['logged_in'])) {

@@ -10,12 +10,12 @@
 ?>
 <a href="http://www.kinglythings.com/final/new-story.php">
     <div id="new_story" class="col-offset-md-1 col-md-2">
-        Make a Story
+        Create
     </div>
 </a>
 <?php echo '<a href="http://www.kinglythings.com/final/profile.php?author_id=' . $_SESSION['user_id'] . '">'; ?>
     <div id="register" class="col-offset-md-1 col-md-2">
-        My Profile
+        Profile
     </div>
 </a>
 <a href="http://www.kinglythings.com/final/help.php">
