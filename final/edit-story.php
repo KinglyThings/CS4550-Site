@@ -367,7 +367,7 @@ if ($allowed_to_edit) {
                 $first_card_result = @mysqli_query($final_dbc, $first_card_query);
                 
 
-                if (mysqli_num_rows($parent_result)) {
+                if (mysqli_num_rows($first_card_result)) {
                     // This is the first card, all is well
                     $is_first_card = true;
                 } else {
