@@ -231,8 +231,8 @@ if ($allowed_to_edit) {
         
 
         // Validate the body text
-        if (isset($_POST['text'])) {
-            $test = trim(stripslashes($_POST['text']));
+        if (isset($_POST['story_text'])) {
+            $story_text = trim(stripslashes($_POST['story_text']));
         } else {
             $errors[] = "A choice MUST have text associated with it.";
         }
@@ -325,7 +325,7 @@ if ($allowed_to_edit) {
             // 2.) Update the choice text in cardmap table
             if (empty($errors)) {
                 $update_queries = array();
-                $update_queries[] = "UPDATE card SET text = " . mysqli_real_escape_string($final_dbc, $text) . " WHERE story_id = " . mysqli_real_escape_string($final_dbc, $story_id) . " AND card_id = " . mysqli_real_escape_string($final_dbc, $card_id) . ";";
+                $update_queries[] = "UPDATE card SET story_text = " . mysqli_real_escape_string($final_dbc, $story_text) . " WHERE story_id = " . mysqli_real_escape_string($final_dbc, $story_id) . " AND card_id = " . mysqli_real_escape_string($final_dbc, $card_id) . ";";
                 $update_queries[] = "UPDATE cardmap SET choice_text = " . mysqli_real_escape_string($final_dbc, $choice_text) . " WHERE story_id = " . mysqli_real_escape_string($final_dbc, $story_id) . " AND card_id = " . mysqli_real_escape_string($final_dbc, $parent_id) . " AND choice_id = " . mysqli_real_escape_string($final_dbc, $card_id) . ";";
 
                 // Exceute all of the update queries
@@ -380,7 +380,7 @@ if ($allowed_to_edit) {
             if (empty($errors) && $is_first_card) {
                 // We're updating the first card
                 // We just need to change the card database
-                $update_query = "UPDATE card SET text = " . mysqli_real_escape_string($final_dbc, $text) . ";";
+                $update_query = "UPDATE card SET story_text = " . mysqli_real_escape_string($final_dbc, $story_text) . ";";
                 $update_result = @mysqli_query($final_dbc, $update_query);
 
                 if (!$result) {
@@ -405,7 +405,7 @@ if ($allowed_to_edit) {
 
                 if (empty($errors)) {
                     $update_queries = array();
-                    $update_queries[] = "UPDATE card SET text = " . mysqli_real_escape_string($final_dbc, $text) . " WHERE story_id = " . mysqli_real_escape_string($final_dbc, $story_id) . " AND card_id = " . mysqli_real_escape_string($final_dbc, $card_id) . ";";
+                    $update_queries[] = "UPDATE card SET story_text = " . mysqli_real_escape_string($final_dbc, $srory_text) . " WHERE story_id = " . mysqli_real_escape_string($final_dbc, $story_id) . " AND card_id = " . mysqli_real_escape_string($final_dbc, $card_id) . ";";
                     $update_queries[] = "UPDATE cardmap SET choice_text = " . mysqli_real_escape_string($final_dbc, $choice_text) . " WHERE story_id = " . mysqli_real_escape_string($final_dbc, $story_id) . " AND card_id = " . mysqli_real_escape_string($final_dbc, $parent_id) . " AND choice_id = " . mysqli_real_escape_string($final_dbc, $card_id) . ";";
 
                     foreach ($update_queries as $query) {
@@ -449,7 +449,7 @@ if ($allowed_to_edit) {
             if (empty($errors)) {
                 // TODO: Do all of these queries in one transaction so that it can be rolled back
                 $insert_queries = array();
-                $create_query = "INSERT INTO card (story_id, text) VALUES ( " . mysqli_real_escape_string($final_dbc, $story_id) . ", " . mysqli_real_escape_string($final_dbc, $text) . ");";
+                $create_query = "INSERT INTO card (story_id, story_text) VALUES ( " . mysqli_real_escape_string($final_dbc, $story_id) . ", " . mysqli_real_escape_string($final_dbc, $story_text) . ");";
                 // Since we need the card id to do everything else, create this first and then use the resuling insert id
                 $create_result = @mysqli_query($final_dbc, $create_query);
 
@@ -497,7 +497,7 @@ if ($allowed_to_edit) {
             // If there are still no errors, then this will be the first card in the story
             // Choice text is irrelvant, so add the card are add it to the first_card table
             if (empty($errors)) {
-                $insert_query = 'INSERT INTO card (story_id, text) VALUES (' . mysqli_real_escape_string($final_dbc, $story_id) . ", " . mysqli_real_escape_string($final_dbc, $text) . ");";
+                $insert_query = 'INSERT INTO card (story_id, story_text) VALUES (' . mysqli_real_escape_string($final_dbc, $story_id) . ", " . mysqli_real_escape_string($final_dbc, $story_text) . ");";
                 $insert_result = @mysqli_query($final_dbc, $insert_query);
 
                 if ($insert_result) {
@@ -666,7 +666,7 @@ if ($error === "" && $allowed_to_edit) {
     
     // Show the Text of the parent Card (if there is one)
     if (isset($parent_id)) {
-        echo '<div id="parent-pane" class="col-sm-12">' . htmlentities($parent['text']) . '</div>';
+        echo '<div id="parent-pane" class="col-sm-12">' . htmlentities($parent['story_text']) . '</div>';
 
         // Have a link to edit the parent card
         echo '<button type="button" role="button" id="edit-parent" class="btn btn-primary btn-lg">Edit Parent Card</button>';
@@ -682,24 +682,32 @@ if ($error === "" && $allowed_to_edit) {
         } else {
             echo '<input type="text" name="choice_text" class="form-control" id="edit_story_choice_text" placeholder="Enter the text that leads to this card here" maxlength="64" size="64">';
         }
-        echo '</div></div>';
+        echo '</div>';
     }
     
     // Show An option to edit the text of THIS card
     echo '<div id="text-pane" class="col-sm-8">';
-    echo '<div id="text_group" class="form-group">';
+    echo '<div id="edit_story_text_group" class="form-group">';
     if (isset($card_id) && !empty($card)) {
-        echo '<textarea rows="25" id="edit_story_text" name="text" class="form-control" placeholder="Enter story text here!">' . htmlentities($card['text']) . '</textarea>';
+        echo '<textarea rows="25" id="edit_story_text" name="story_text" class="form-control" placeholder="Enter story text here!">' . htmlentities($card['story_text']) . '</textarea>';
     } else {
-        echo '<textarea rows="25" id="edit_story_text" name="text" class="form-control" placeholder="Enter story text here!"></textarea>';
+        echo '<textarea rows="25" id="edit_story_text" name="story_text" class="form-control" placeholder="Enter story text here!"></textarea>';
     }
-    echo '</div></div>';
+    echo '</div>';
+    echo '<div class="form-group"><div class="col-sm-offset-2 col-sm-2">';
+    echo '<button type="submit" name="submit" role="button" class="btn btn-primary btn-lg">';
+    if ($new) {
+        echo 'Add Card';
+    } else {
+        echo 'Save Your Changes';
+    }
+    echo '</button></div></div></div>';
 
     // Show an option to delete THIS CARD (and all of its subcards)
     echo '<div id="choice-pane" class="col-sm-4">';
     echo '<div class="form-group">';
     echo '<button type="submit" name="delete" role="button" class="btn btn-danger btn-lg" id="delete-button">Delete This Card</button>';
-    echo '</div></div>';
+    echo '</div></div></div>';
 
     // TODO: Add a script to force a confirmation dialog on deleting a card
 
@@ -711,14 +719,7 @@ if ($error === "" && $allowed_to_edit) {
     // - IF THERE ARE FEWER THAN FOUR CHOICES, add an option to add a new child card to this card
 
     // Spit out the button and end the form
-    echo '<div class="form-group"><div class="col-sm-offset-2 col-sm-2">';
-    echo '<button type="submit" name="submit" role="button" class="btn btn-primary btn-lg">';
-    if ($new) {
-        echo 'Add Card';
-    } else {
-        echo 'Save Your Changes';
-    }
-    echo '</button></div</div>';
+    echo '</div>';
     echo '</form>';
 
 } else {

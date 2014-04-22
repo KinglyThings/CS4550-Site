@@ -123,7 +123,7 @@ if ($story_error === "NO STORY") {
     echo '<div class="row">';
     echo '<div id="title-pane" class="col-sm-12">' . htmlentities($story['title']) . '</div>';
     echo '<div id="text-pane" class="col-sm-8"><div id="text-window">';
-    echo htmlentities($card['text']);
+    echo htmlentities($card['story_text']);
     echo '</div></div>';
     echo '<div id="choice-pane" class="col-sm-4">';
     for ($i = 0; $i < count($choices); $i++) {
